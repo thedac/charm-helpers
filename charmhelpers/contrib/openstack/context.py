@@ -252,11 +252,22 @@ class SharedDBContext(OSContextGenerator):
                 rdata = relation_get(rid=rid, unit=unit)
                 host = rdata.get('db_host')
                 host = format_ipv6_addr(host) or host
+                password = rdata.get(password_setting)
+                # Check for json encoding
+                try:
+                    host = json.loads(host)
+                except (TypeError, ValueError) as e:
+                    pass
+                try:
+                    password = json.loads(password)
+                except (TypeError, ValueError) as e:
+                    pass
+
                 ctxt = {
                     'database_host': host,
                     'database': self.database,
                     'database_user': self.user,
-                    'database_password': rdata.get(password_setting),
+                    'database_password': password,
                     'database_type': 'mysql+pymysql'
                 }
                 if CompareOpenStackReleases(rel) < 'queens':
